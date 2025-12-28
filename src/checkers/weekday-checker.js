@@ -1,5 +1,5 @@
 // 曜日整合性チェッカー
-// 日付と曜日の整合性を確認
+// 日付と曜日の組み合わせを抽出して確認を促す
 
 const WeekdayChecker = {
   // 曜日の対応表
@@ -19,8 +19,7 @@ const WeekdayChecker = {
       message: '',
       severity: 'info',
       details: {
-        issues: [],
-        checked: []
+        patterns: []
       }
     };
 
@@ -28,33 +27,24 @@ const WeekdayChecker = {
       return result;
     }
 
-    // 日付と曜日のパターンを抽出してチェック
+    // 日付と曜日のパターンを抽出
     const patterns = this.extractDateWeekdayPatterns(text);
-    result.details.checked = patterns;
+    result.details.patterns = patterns;
 
-    for (const pattern of patterns) {
-      const actualWeekday = this.getActualWeekday(pattern.year, pattern.month, pattern.day);
+    // 日付・曜日が検出された場合は確認を促す
+    if (patterns.length > 0) {
+      result.passed = true; // エラーではなく確認のみ
+      result.severity = 'warning'; // 警告として表示
 
-      if (actualWeekday !== pattern.claimedWeekday) {
-        result.details.issues.push({
-          text: pattern.text,
-          claimed: pattern.claimedWeekday,
-          actual: actualWeekday,
-          message: `${pattern.month}月${pattern.day}日は${actualWeekday}曜日です（${pattern.claimedWeekday}曜日と記載）`
-        });
-      }
-    }
+      const patternList = patterns.map(p => {
+        const actualWeekday = this.getActualWeekday(p.year, p.month, p.day);
+        const match = (actualWeekday === p.claimedWeekday) ? '✓' : '?';
+        return `  ${match} ${p.text}`;
+      }).join('\n');
 
-    // 結果の生成
-    if (result.details.issues.length > 0) {
-      result.passed = false;
-      result.severity = 'error';
-      const messages = result.details.issues.map(issue => issue.message);
-      result.message = `曜日の誤り:\n${messages.join('\n')}`;
-    } else if (patterns.length > 0) {
-      result.message = `${patterns.length}個の日付・曜日を確認（問題なし）`;
+      result.message = `以下の日付と曜日をご確認ください:\n${patternList}`;
     } else {
-      result.message = '曜日付きの日付は検出されませんでした';
+      result.message = '';
     }
 
     return result;
@@ -68,42 +58,67 @@ const WeekdayChecker = {
   extractDateWeekdayPatterns(text) {
     const results = [];
     const currentYear = new Date().getFullYear();
+    const seenTexts = new Set(); // 重複排除用
 
     // パターン1: MM月DD日（曜）or MM月DD日（曜日）
     const pattern1 = /(\d{1,2})月(\d{1,2})日[（(]([日月火水木金土])曜?日?[）)]/g;
     let match;
     while ((match = pattern1.exec(text)) !== null) {
-      results.push({
-        text: match[0],
-        year: currentYear,
-        month: parseInt(match[1]),
-        day: parseInt(match[2]),
-        claimedWeekday: match[3]
-      });
+      if (!seenTexts.has(match[0])) {
+        seenTexts.add(match[0]);
+        results.push({
+          text: match[0],
+          year: currentYear,
+          month: parseInt(match[1]),
+          day: parseInt(match[2]),
+          claimedWeekday: match[3]
+        });
+      }
     }
 
-    // パターン2: YYYY年MM月DD日（曜）
-    const pattern2 = /(\d{4})[年\/](\d{1,2})[月\/](\d{1,2})日?[（(]([日月火水木金土])曜?日?[）)]/g;
+    // パターン2: MM/DD（曜）or MM/DD（曜日）- 年なしスラッシュ形式
+    const pattern2 = /(\d{1,2})\/(\d{1,2})[（(]([日月火水木金土])曜?日?[）)]/g;
     while ((match = pattern2.exec(text)) !== null) {
-      results.push({
-        text: match[0],
-        year: parseInt(match[1]),
-        month: parseInt(match[2]),
-        day: parseInt(match[3]),
-        claimedWeekday: match[4]
-      });
+      if (!seenTexts.has(match[0])) {
+        seenTexts.add(match[0]);
+        results.push({
+          text: match[0],
+          year: currentYear,
+          month: parseInt(match[1]),
+          day: parseInt(match[2]),
+          claimedWeekday: match[3]
+        });
+      }
     }
 
-    // パターン3: YYYY/MM/DD（曜）
-    const pattern3 = /(\d{4})\/(\d{1,2})\/(\d{1,2})[（(]([日月火水木金土])曜?日?[）)]/g;
+    // パターン3: YYYY年MM月DD日（曜）
+    const pattern3 = /(\d{4})年(\d{1,2})月(\d{1,2})日[（(]([日月火水木金土])曜?日?[）)]/g;
     while ((match = pattern3.exec(text)) !== null) {
-      results.push({
-        text: match[0],
-        year: parseInt(match[1]),
-        month: parseInt(match[2]),
-        day: parseInt(match[3]),
-        claimedWeekday: match[4]
-      });
+      if (!seenTexts.has(match[0])) {
+        seenTexts.add(match[0]);
+        results.push({
+          text: match[0],
+          year: parseInt(match[1]),
+          month: parseInt(match[2]),
+          day: parseInt(match[3]),
+          claimedWeekday: match[4]
+        });
+      }
+    }
+
+    // パターン4: YYYY/MM/DD（曜）- 年ありスラッシュ形式
+    const pattern4 = /(\d{4})\/(\d{1,2})\/(\d{1,2})[（(]([日月火水木金土])曜?日?[）)]/g;
+    while ((match = pattern4.exec(text)) !== null) {
+      if (!seenTexts.has(match[0])) {
+        seenTexts.add(match[0]);
+        results.push({
+          text: match[0],
+          year: parseInt(match[1]),
+          month: parseInt(match[2]),
+          day: parseInt(match[3]),
+          claimedWeekday: match[4]
+        });
+      }
     }
 
     return results;

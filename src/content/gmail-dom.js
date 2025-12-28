@@ -240,7 +240,7 @@ const GmailDOM = {
   },
 
   /**
-   * 本文を取得する
+   * 本文を取得する（引用部分を除外）
    * @param {Element} composeWindow Compose Window要素
    * @returns {string} 本文テキスト
    */
@@ -258,7 +258,45 @@ const GmailDOM = {
     for (const selector of bodySelectors) {
       const body = composeWindow.querySelector(selector);
       if (body) {
-        return body.innerText || '';
+        // 本文要素のクローンを作成
+        const clone = body.cloneNode(true);
+
+        // 引用部分を除去（Gmailの引用マーカー）
+        const quoteSelectors = [
+          '.gmail_quote',           // 標準の引用
+          '.gmail_extra',           // 追加情報
+          'blockquote',             // 引用ブロック
+          'div.gmail_attr',         // 引用属性
+          'div[data-smartmail]',    // スマートメール引用
+          '.im',                    // インライン引用マーカー
+          'div.h5',                 // 古い形式の引用
+          'div.moz-cite-prefix'     // Mozilla形式
+        ];
+
+        quoteSelectors.forEach(sel => {
+          clone.querySelectorAll(sel).forEach(el => el.remove());
+        });
+
+        // "On ... wrote:" や "-------- Original Message --------" などの行も除去
+        let text = clone.innerText || '';
+
+        // 返信ヘッダーパターンを除去
+        const replyHeaderPatterns = [
+          /^On .+ wrote:$/gm,
+          /^.+さんが.+に送信:$/gm,
+          /^-{3,}\s*Original Message\s*-{3,}$/gmi,
+          /^-{3,}\s*元のメッセージ\s*-{3,}$/gm,
+          /^From:.+$/gm,
+          /^送信日時:.+$/gm,
+          /^宛先:.+$/gm,
+          /^件名:.+$/gm
+        ];
+
+        replyHeaderPatterns.forEach(pattern => {
+          text = text.replace(pattern, '');
+        });
+
+        return text.trim();
       }
     }
 
