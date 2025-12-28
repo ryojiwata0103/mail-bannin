@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Gmail送信前チェッカー",
+  "name": "メール番人",
   "version": "1.0.0",
-  "description": "Gmail送信前に誤字脱字・添付忘れ・宛先を確認し、誤送信を防止します",
+  "description": "Gmailの誤送信を防ぐ番人。送信前に宛先・添付・誤字脱字・日付をチェック",
   "default_locale": "ja",
   "permissions": [
     "storage",

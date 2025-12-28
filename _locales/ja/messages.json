@@ -1,10 +1,10 @@
 {
   "extensionName": {
-    "message": "Gmail送信前チェッカー",
+    "message": "メール番人",
     "description": "拡張機能の名前"
   },
   "extensionDescription": {
-    "message": "Gmail送信前に誤字脱字・添付忘れ・宛先を確認し、誤送信を防止します",
+    "message": "Gmailの誤送信を防ぐ番人。送信前に宛先・添付・誤字脱字・日付をチェック",
     "description": "拡張機能の説明"
   }
 }
