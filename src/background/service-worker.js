@@ -1,4 +1,4 @@
-// Gmail送信前チェッカー - Service Worker
+// メール番人 - Service Worker
 // Manifest V3 Background Script
 
 // 拡張機能インストール時の初期設定
@@ -17,7 +17,7 @@ chrome.runtime.onInstalled.addListener((details) => {
       },
       showConfirmDialog: true
     });
-    console.log('Gmail送信前チェッカーがインストールされました');
+    console.log('メール番人がインストールされました');
   }
 });
 

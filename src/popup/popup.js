@@ -1,4 +1,4 @@
-// Gmail送信前チェッカー - ポップアップロジック
+// メール番人 - ポップアップロジック
 
 document.addEventListener('DOMContentLoaded', async () => {
   // 設定を読み込む

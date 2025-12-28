@@ -1,4 +1,4 @@
-// Gmail送信前チェッカー - メインContent Script
+// メール番人 - メインContent Script
 // 送信ボタンのインターセプトとチェック実行
 
 (function() {
@@ -28,20 +28,20 @@
    * 初期化
    */
   async function initialize() {
-    console.log('[Gmail送信前チェッカー] 初期化中...');
+    console.log('[メール番人] 初期化中...');
 
     // 設定を読み込む
     await loadSettings();
 
     if (!settings.enabled) {
-      console.log('[Gmail送信前チェッカー] 無効化されています');
+      console.log('[メール番人] 無効化されています');
       return;
     }
 
     // 送信ボタンの監視を開始
     startObserving();
 
-    console.log('[Gmail送信前チェッカー] 初期化完了');
+    console.log('[メール番人] 初期化完了');
   }
 
   /**
@@ -54,7 +54,7 @@
         settings = { ...settings, ...result };
       }
     } catch (error) {
-      console.warn('[Gmail送信前チェッカー] 設定の読み込みに失敗:', error);
+      console.warn('[メール番人] 設定の読み込みに失敗:', error);
     }
   }
 
@@ -123,7 +123,7 @@
       // Compose Windowを特定
       const composeWindow = findComposeWindowForButton(button);
       if (!composeWindow) {
-        console.warn('[Gmail送信前チェッカー] Compose Windowが見つかりません');
+        console.warn('[メール番人] Compose Windowが見つかりません');
         proceedWithSend(button);
         return;
       }
@@ -141,7 +141,7 @@
         proceedWithSend(button);
       }
     } catch (error) {
-      console.error('[Gmail送信前チェッカー] エラー:', error);
+      console.error('[メール番人] エラー:', error);
       // エラー時は送信を許可
       proceedWithSend(button);
     }
@@ -155,17 +155,49 @@
   function findComposeWindowForButton(button) {
     // ボタンの親要素をたどってCompose Windowを探す
     let element = button;
-    while (element) {
-      // Compose Windowの特徴的なクラスを持つ要素を探す
+    while (element && element !== document.body) {
+      // 新規作成ウィンドウ
       if (element.classList.contains('M9') ||
-          element.classList.contains('AD') ||
-          (element.getAttribute('role') === 'dialog' && element.querySelector('div[aria-label*="メッセージ本文"]'))) {
+          element.classList.contains('AD')) {
         return element;
       }
+
+      // ダイアログ形式
+      if (element.getAttribute('role') === 'dialog') {
+        return element;
+      }
+
+      // 返信・インライン返信の特徴的なクラス
+      if (element.classList.contains('iN') ||
+          element.classList.contains('ip') ||
+          element.classList.contains('nH')) {
+        // 宛先やメッセージ本文が含まれているか確認
+        if (element.querySelector('[email]') ||
+            element.querySelector('div[aria-label*="メッセージ本文"]') ||
+            element.querySelector('div[aria-label*="Message Body"]') ||
+            element.querySelector('div.Am.Al.editable') ||
+            element.querySelector('div[role="textbox"]')) {
+          return element;
+        }
+      }
+
+      // 返信ボックス全体（より広い範囲）
+      if (element.classList.contains('aO7') ||
+          element.classList.contains('gs')) {
+        return element;
+      }
+
       element = element.parentElement;
     }
 
-    // 見つからない場合はアクティブなCompose Windowを返す
+    // 見つからない場合はより広い範囲で検索
+    // 送信ボタンを含む最も近いコンテナを探す
+    let container = button.closest('div.M9, div[role="dialog"], div.iN, div.ip, div.nH.Hd, table.cf');
+    if (container) {
+      return container;
+    }
+
+    // それでも見つからない場合はアクティブなCompose Windowを返す
     return GmailDOM.findComposeWindow();
   }
 

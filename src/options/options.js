@@ -1,4 +1,4 @@
-// Gmail送信前チェッカー - 設定画面ロジック
+// メール番人 - 設定画面ロジック
 
 document.addEventListener('DOMContentLoaded', async () => {
   // 設定を読み込む

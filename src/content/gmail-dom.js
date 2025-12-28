@@ -13,9 +13,17 @@ const GmailDOM = {
 
   // Compose Window（メール作成画面）のセレクタ
   COMPOSE_SELECTORS: [
+    // 新規作成ウィンドウ
     'div.M9',
     'div[role="dialog"]',
-    'div.AD'
+    'div.AD',
+    // 返信・インライン返信
+    'div.iN',
+    'div.nH.Hd',
+    'div.aO7',
+    'div.Am.Al.editable',
+    // 返信ボックスの親要素
+    'div.ip.iq'
   ],
 
   /**
@@ -54,30 +62,57 @@ const GmailDOM = {
   getSenderEmail(composeWindow) {
     if (!composeWindow) return '';
 
-    // From フィールドのセレクタパターン
-    const fromSelectors = [
-      'div[data-hovercard-owner-id]',
-      'span[email]',
-      'div.Kj-JD-Jz span[email]',
-      'input[name="from"]'
+    // From ドロップダウン（複数アカウント時）のセレクタ
+    const fromDropdownSelectors = [
+      // From選択ドロップダウン内のメールアドレス
+      'div.az4 span.ams',
+      'div[data-tooltip*="差出人"] span',
+      'div.az4 div[data-hovercard-id]',
+      'td.az3 span[email]',
+      // 送信元選択エリア
+      'div.dW.E span[email]',
+      'div.az2 span[email]'
     ];
 
-    for (const selector of fromSelectors) {
+    // まずFromドロップダウンを確認
+    for (const selector of fromDropdownSelectors) {
       const elem = composeWindow.querySelector(selector);
       if (elem) {
         const email = elem.getAttribute('email') || elem.textContent;
-        if (email && email.includes('@')) {
-          return email.trim();
+        if (email) {
+          // メールアドレスを抽出
+          const match = email.match(/[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}/);
+          if (match) {
+            return match[0].trim();
+          }
         }
       }
     }
 
-    // デフォルトアカウントを取得
-    const accountBtn = document.querySelector('a[aria-label*="Google アカウント"]');
-    if (accountBtn) {
-      const label = accountBtn.getAttribute('aria-label');
-      const match = label?.match(/[\w.-]+@[\w.-]+/);
-      if (match) return match[0];
+    // ログインしているGoogleアカウントを取得（より確実な方法）
+    const accountSelectors = [
+      'a[aria-label*="Google アカウント"]',
+      'a[aria-label*="Google Account"]',
+      'a[href*="SignOutOptions"]',
+      'header a[href*="accounts.google.com"]'
+    ];
+
+    for (const selector of accountSelectors) {
+      const accountBtn = document.querySelector(selector);
+      if (accountBtn) {
+        const label = accountBtn.getAttribute('aria-label') || '';
+        const match = label.match(/[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}/);
+        if (match) return match[0];
+      }
+    }
+
+    // ページ内のメタ情報から取得
+    const gmailUser = document.querySelector('meta[name="user"]');
+    if (gmailUser) {
+      const content = gmailUser.getAttribute('content');
+      if (content && content.includes('@')) {
+        return content.trim();
+      }
     }
 
     return '';
@@ -93,23 +128,81 @@ const GmailDOM = {
 
     const recipients = { to: [], cc: [], bcc: [] };
 
-    // 宛先フィールドのセレクタ
+    // 宛先フィールドのセレクタ（返信・新規作成両対応）
     const fieldMap = {
-      to: ['div[name="to"] span[email]', 'input[name="to"]', 'div.fX span[email]'],
-      cc: ['div[name="cc"] span[email]', 'input[name="cc"]', 'div.fX span[email]'],
-      bcc: ['div[name="bcc"] span[email]', 'input[name="bcc"]']
+      to: [
+        // 返信時・新規作成時の共通セレクタ
+        'div[name="to"] span[email]',
+        'div[data-hovercard-id][email]',
+        'span[email][data-hovercard-id]',
+        'div.fX span[email]',
+        'div.aoD.hl span[email]',
+        'div.GS span[email]',
+        // 返信インライン時
+        'div.aCj span[email]',
+        'div.anV span[email]',
+        // To行全体から検索
+        'tr.GS td.GR span[email]',
+        'div[aria-label*="宛先"] span[email]',
+        'div[aria-label*="To"] span[email]',
+        // input要素
+        'input[name="to"]'
+      ],
+      cc: [
+        'div[name="cc"] span[email]',
+        'div.aoD.hl span[email]',
+        'tr.GS td.GR span[email]',
+        'div[aria-label*="Cc"] span[email]',
+        'input[name="cc"]'
+      ],
+      bcc: [
+        'div[name="bcc"] span[email]',
+        'div[aria-label*="Bcc"] span[email]',
+        'input[name="bcc"]'
+      ]
     };
 
-    for (const [field, selectors] of Object.entries(fieldMap)) {
+    // 全体からemail属性を持つ要素を検索する汎用関数
+    const extractEmailsFromElements = (container, selectors) => {
+      const emails = [];
       for (const selector of selectors) {
-        const elems = composeWindow.querySelectorAll(selector);
-        elems.forEach(elem => {
-          const email = elem.getAttribute('email') || elem.value || elem.textContent;
-          if (email && email.includes('@')) {
-            recipients[field].push(email.trim());
-          }
-        });
-        if (recipients[field].length > 0) break;
+        try {
+          const elems = container.querySelectorAll(selector);
+          elems.forEach(elem => {
+            const email = elem.getAttribute('email') || elem.value || '';
+            if (email && email.includes('@') && !emails.includes(email.trim())) {
+              emails.push(email.trim());
+            }
+          });
+          if (emails.length > 0) break;
+        } catch (e) {
+          console.log('Selector error:', selector, e);
+        }
+      }
+      return emails;
+    };
+
+    // 各フィールドを検索
+    for (const [field, selectors] of Object.entries(fieldMap)) {
+      recipients[field] = extractEmailsFromElements(composeWindow, selectors);
+    }
+
+    // Toが空の場合、より広範囲で検索
+    if (recipients.to.length === 0) {
+      // email属性を持つ全ての要素から検索
+      const allEmailElems = composeWindow.querySelectorAll('[email]');
+      const foundEmails = [];
+      allEmailElems.forEach(elem => {
+        const email = elem.getAttribute('email');
+        if (email && email.includes('@')) {
+          // 送信者と思われるアドレスは除外（後で追加）
+          foundEmails.push(email.trim());
+        }
+      });
+
+      // 重複除去して設定
+      if (foundEmails.length > 0) {
+        recipients.to = [...new Set(foundEmails)];
       }
     }
 
