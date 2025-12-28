@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gmail送信前チェッカー</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup">
+    <header>
+      <h1>Gmail送信前チェッカー</h1>
+    </header>
+
+    <main>
+      <div class="status-section">
+        <div class="status-indicator" id="status-indicator">
+          <span class="status-dot"></span>
+          <span class="status-text" id="status-text">有効</span>
+        </div>
+      </div>
+
+      <div class="toggle-section">
+        <label class="toggle">
+          <input type="checkbox" id="enabled-toggle" checked>
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">チェック機能</span>
+        </label>
+      </div>
+
+      <div class="quick-info">
+        <p>Gmailの送信前に以下をチェックします：</p>
+        <ul>
+          <li>送信元・送信先</li>
+          <li>添付忘れ</li>
+          <li>誤字脱字</li>
+          <li>日付・曜日の整合性</li>
+        </ul>
+      </div>
+    </main>
+
+    <footer>
+      <a href="#" id="open-options" class="link">詳細設定</a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

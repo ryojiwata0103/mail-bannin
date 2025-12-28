@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gmail送信前チェッカー - 設定</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Gmail送信前チェッカー</h1>
+      <p class="subtitle">設定</p>
+    </header>
+
+    <main>
+      <section class="settings-section">
+        <h2>基本設定</h2>
+
+        <div class="setting-item">
+          <label class="toggle">
+            <input type="checkbox" id="enabled" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">拡張機能を有効にする</span>
+          </label>
+          <p class="setting-description">無効にすると、送信前チェックが行われなくなります</p>
+        </div>
+
+        <div class="setting-item">
+          <label class="toggle">
+            <input type="checkbox" id="showConfirmDialog" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">送信前に確認ダイアログを表示する</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2>チェック項目</h2>
+
+        <div class="setting-item">
+          <label class="toggle">
+            <input type="checkbox" id="checker-sender" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">送信元チェック</span>
+          </label>
+          <p class="setting-description">送信元アカウントを確認します</p>
+        </div>
+
+        <div class="setting-item">
+          <label class="toggle">
+            <input type="checkbox" id="checker-recipient" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">送信先チェック</span>
+          </label>
+          <p class="setting-description">宛先（To/Cc/Bcc）を確認します</p>
+        </div>
+
+        <div class="setting-item">
+          <label class="toggle">
+            <input type="checkbox" id="checker-attachment" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">添付ファイルチェック</span>
+          </label>
+          <p class="setting-description">「添付」などのキーワードがあるのに添付がない場合に警告します</p>
+        </div>
+
+        <div class="setting-item">
+          <label class="toggle">
+            <input type="checkbox" id="checker-typo" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">誤字脱字チェック</span>
+          </label>
+          <p class="setting-description">よくある誤変換・誤入力をチェックします</p>
+        </div>
+
+        <div class="setting-item">
+          <label class="toggle">
+            <input type="checkbox" id="checker-date" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">日付整合性チェック</span>
+          </label>
+          <p class="setting-description">過去の日付への言及などをチェックします</p>
+        </div>
+
+        <div class="setting-item">
+          <label class="toggle">
+            <input type="checkbox" id="checker-weekday" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">曜日整合性チェック</span>
+          </label>
+          <p class="setting-description">日付と曜日の不一致をチェックします</p>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2>情報</h2>
+        <p class="info-text">
+          バージョン: 1.0.0<br>
+          メールの内容はすべてローカルで処理され、外部に送信されることはありません。
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <button id="save-btn" class="btn btn-primary">設定を保存</button>
+      <span id="save-status" class="save-status"></span>
+    </footer>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

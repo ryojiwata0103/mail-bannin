@@ -1,0 +1,111 @@
+{
+  "version": "1.0.0",
+  "description": "日本語のよくある誤字・誤変換パターン",
+  "typos": [
+    {
+      "wrong": "ございいます",
+      "correct": "ございます",
+      "category": "敬語"
+    },
+    {
+      "wrong": "おりいます",
+      "correct": "おります",
+      "category": "敬語"
+    },
+    {
+      "wrong": "いいたします",
+      "correct": "いたします",
+      "category": "敬語"
+    },
+    {
+      "wrong": "頂きいます",
+      "correct": "頂きます",
+      "category": "敬語"
+    },
+    {
+      "wrong": "いただきいます",
+      "correct": "いただきます",
+      "category": "敬語"
+    },
+    {
+      "wrong": "お疲れ様さまです",
+      "correct": "お疲れ様です",
+      "category": "敬語"
+    },
+    {
+      "wrong": "お疲れさまさまです",
+      "correct": "お疲れ様です",
+      "category": "敬語"
+    },
+    {
+      "wrong": "ご確認認",
+      "correct": "ご確認",
+      "category": "重複"
+    },
+    {
+      "wrong": "宜しく尾願いします",
+      "correct": "よろしくお願いします",
+      "category": "誤変換"
+    },
+    {
+      "wrong": "宜しくお願いしいます",
+      "correct": "よろしくお願いいたします",
+      "category": "敬語"
+    },
+    {
+      "wrong": "確人",
+      "correct": "確認",
+      "category": "誤変換"
+    },
+    {
+      "wrong": "連楽",
+      "correct": "連絡",
+      "category": "誤変換"
+    },
+    {
+      "wrong": "以情",
+      "correct": "以上",
+      "category": "誤変換"
+    },
+    {
+      "wrong": "依頼依頼",
+      "correct": "依頼",
+      "category": "重複"
+    },
+    {
+      "wrong": "報告報告",
+      "correct": "報告",
+      "category": "重複"
+    },
+    {
+      "wrong": "対応対応",
+      "correct": "対応",
+      "category": "重複"
+    },
+    {
+      "wrong": "。。",
+      "correct": "。",
+      "category": "句読点"
+    },
+    {
+      "wrong": "、、",
+      "correct": "、",
+      "category": "句読点"
+    },
+    {
+      "wrong": "？？",
+      "correct": "？",
+      "category": "句読点"
+    },
+    {
+      "wrong": "！！",
+      "correct": "！",
+      "category": "句読点"
+    },
+    {
+      "wrong": "下さいませ。。",
+      "correct": "下さいませ。",
+      "category": "句読点"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "manifest_version": 3,
+  "name": "Gmail送信前チェッカー",
+  "version": "1.0.0",
+  "description": "Gmail送信前に誤字脱字・添付忘れ・宛先を確認し、誤送信を防止します",
+  "default_locale": "ja",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://mail.google.com/*"
+  ],
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": [
+        "src/checkers/sender-checker.js",
+        "src/checkers/recipient-checker.js",
+        "src/checkers/attachment-checker.js",
+        "src/checkers/typo-checker.js",
+        "src/checkers/date-checker.js",
+        "src/checkers/weekday-checker.js",
+        "src/content/gmail-dom.js",
+        "src/content/email-parser.js",
+        "src/ui/confirmation-dialog.js",
+        "src/content/content-script.js"
+      ],
+      "css": ["src/content/styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "32": "assets/icons/icon32.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    }
+  },
+  "options_page": "src/options/options.html",
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/dictionaries/*.json"],
+      "matches": ["https://mail.google.com/*"]
+    }
+  ],
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "32": "assets/icons/icon32.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  }
+}
